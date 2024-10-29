@@ -19,7 +19,7 @@ export function HeroSection() {
           Shop the best Deals on Top Brands & Unique Finds
         </h1>
         <p className="text-gray-600 text-lg">
-          From everyday essentials to rare gems, we've got something for everyone.
+          From everyday essentials to rare gems, we&apos;ve got something for everyone.
         </p>
         <div>
           <Button 
