@@ -95,9 +95,9 @@ const CartDropdown = ({
         leaveTo="translate-x-full"
       >
         <div className="fixed inset-y-0 right-0 w-full max-w-md z-50">
-          <div className="flex flex-col h-full bg-black text-white">
+          <div className={`flex flex-col h-full ${!cartState?.items?.length ? 'bg-white text-black' : 'bg-black text-white'}`}>
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
+            <div className={`flex items-center justify-between p-4 border-b ${!cartState?.items?.length ? 'border-gray-200' : 'border-white/10'}`}>
               <h2 className="text-xl font-medium">My Cart</h2>
               <button 
                 onClick={close}
@@ -110,13 +110,13 @@ const CartDropdown = ({
             {/* Empty Cart State */}
             {!cartState?.items?.length ? (
               <div className="flex-1 flex flex-col items-center justify-center p-4 space-y-6">
-                <div className="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 border border-gray-200 rounded-full flex items-center justify-center">
                   <ShoppingCart className="w-8 h-8" />
                 </div>
                 <p className="text-xl">Your cart is empty.</p>
                 <LocalizedClientLink href="/store">
                   <Button 
-                    className="bg-white text-black hover:bg-gray-100 px-8 py-2 rounded-md"
+                    className="bg-black text-white hover:bg-black/90 px-8 py-2 rounded-md"
                     onClick={close}
                   >
                     Continue Shopping

@@ -20,7 +20,6 @@ const fetchCart = async () => {
 
 export default async function CartButton() {
   const cart = await fetchCart()
-  console.log(`cart`, cart)
 
   return <CartDropdown cart={cart} />
 }
