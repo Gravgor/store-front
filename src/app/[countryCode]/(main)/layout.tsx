@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic"
 import { Metadata } from "next"
 
 import Footer from "@modules/layout/templates/footer"
