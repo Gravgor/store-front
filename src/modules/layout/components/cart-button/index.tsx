@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import CartDropdown from "../cart-dropdown"
 import { enrichLineItems, retrieveCart } from "@lib/data/cart"
+import { ShoppingBag } from "lucide-react"
 
 const fetchCart = async () => {
   const cart = await retrieveCart()
@@ -19,6 +20,7 @@ const fetchCart = async () => {
 
 export default async function CartButton() {
   const cart = await fetchCart()
+  console.log(`cart`, cart)
 
   return <CartDropdown cart={cart} />
 }

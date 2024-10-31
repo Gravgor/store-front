@@ -5,7 +5,8 @@ import { Heading } from "@medusajs/ui"
 import Image from "next/image"
 
 export default async function FeaturedCategories() {
-  const { product_categories } = await getCategoriesList(0, 4)
+  const { product_categories } = await getCategoriesList(
+  )
 
   // Map of category handles to their display properties
   const categoryDisplayData = {

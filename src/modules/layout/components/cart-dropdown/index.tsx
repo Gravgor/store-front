@@ -1,9 +1,10 @@
 "use client"
 
-import { Popover, Transition } from "@headlessui/react"
+import { Transition } from "@headlessui/react"
 import { Button } from "@medusajs/ui"
 import { usePathname } from "next/navigation"
 import { Fragment, useEffect, useRef, useState } from "react"
+import { X, ShoppingCart } from "lucide-react"
 
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
@@ -36,9 +37,7 @@ const CartDropdown = ({
 
   const timedOpen = () => {
     open()
-
     const timer = setTimeout(close, 5000)
-
     setActiveTimer(timer)
   }
 
@@ -46,11 +45,9 @@ const CartDropdown = ({
     if (activeTimer) {
       clearTimeout(activeTimer)
     }
-
     open()
   }
 
-  // Clean up the timer when the component unmounts
   useEffect(() => {
     return () => {
       if (activeTimer) {
@@ -61,49 +58,75 @@ const CartDropdown = ({
 
   const pathname = usePathname()
 
-  // open cart dropdown when modifying the cart items, but only if we're not on the cart page
   useEffect(() => {
     if (itemRef.current !== totalItems && !pathname.includes("/cart")) {
       timedOpen()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalItems, itemRef.current])
 
   return (
-    <div
-      className="h-full z-50"
-      onMouseEnter={openAndCancel}
-      onMouseLeave={close}
-    >
-      <Popover className="relative h-full">
-        <Popover.Button className="h-full">
-          <LocalizedClientLink
-            className="hover:text-ui-fg-base"
-            href="/cart"
-            data-testid="nav-cart-link"
-          >{`Cart (${totalItems})`}</LocalizedClientLink>
-        </Popover.Button>
-        <Transition
-          show={cartDropdownOpen}
-          as={Fragment}
-          enter="transition ease-out duration-200"
-          enterFrom="opacity-0 translate-y-1"
-          enterTo="opacity-100 translate-y-0"
-          leave="transition ease-in duration-150"
-          leaveFrom="opacity-100 translate-y-0"
-          leaveTo="opacity-0 translate-y-1"
-        >
-          <Popover.Panel
-            static
-            className="hidden small:block absolute top-[calc(100%+1px)] right-0 bg-white border-x border-b border-gray-200 w-[420px] text-ui-fg-base"
-            data-testid="nav-cart-dropdown"
-          >
-            <div className="p-4 flex items-center justify-center">
-              <h3 className="text-large-semi">Cart</h3>
+    <>
+      {/* Backdrop with blur */}
+      <Transition
+        show={cartDropdownOpen}
+        as={Fragment}
+        enter="transition-opacity duration-300"
+        enterFrom="opacity-0"
+        enterTo="opacity-100"
+        leave="transition-opacity duration-300"
+        leaveFrom="opacity-100"
+        leaveTo="opacity-0"
+      >
+        <div 
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+          onClick={close}
+        />
+      </Transition>
+
+      {/* Cart Slide-in */}
+      <Transition
+        show={cartDropdownOpen}
+        as={Fragment}
+        enter="transform transition ease-in-out duration-300"
+        enterFrom="translate-x-full"
+        enterTo="translate-x-0"
+        leave="transform transition ease-in-out duration-300"
+        leaveFrom="translate-x-0"
+        leaveTo="translate-x-full"
+      >
+        <div className="fixed inset-y-0 right-0 w-full max-w-md z-50">
+          <div className="flex flex-col h-full bg-black text-white">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <h2 className="text-xl font-medium">My Cart</h2>
+              <button 
+                onClick={close}
+                className="p-1 hover:opacity-70 transition-opacity"
+              >
+                <X className="w-6 h-6" />
+              </button>
             </div>
-            {cartState && cartState.items?.length ? (
+
+            {/* Empty Cart State */}
+            {!cartState?.items?.length ? (
+              <div className="flex-1 flex flex-col items-center justify-center p-4 space-y-6">
+                <div className="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center">
+                  <ShoppingCart className="w-8 h-8" />
+                </div>
+                <p className="text-xl">Your cart is empty.</p>
+                <LocalizedClientLink href="/store">
+                  <Button 
+                    className="bg-white text-black hover:bg-gray-100 px-8 py-2 rounded-md"
+                    onClick={close}
+                  >
+                    Continue Shopping
+                  </Button>
+                </LocalizedClientLink>
+              </div>
+            ) : (
               <>
-                <div className="overflow-y-scroll max-h-[402px] px-4 grid grid-cols-1 gap-y-8 no-scrollbar p-px">
+                {/* Cart Items */}
+                <div className="flex-1 overflow-y-auto px-4 py-2">
                   {cartState.items
                     .sort((a, b) => {
                       return (a.created_at ?? "") > (b.created_at ?? "")
@@ -112,7 +135,7 @@ const CartDropdown = ({
                     })
                     .map((item) => (
                       <div
-                        className="grid grid-cols-[122px_1fr] gap-x-4"
+                        className="grid grid-cols-[122px_1fr] gap-x-4 border-b border-white/10 py-4"
                         key={item.id}
                         data-testid="cart-item"
                       >
@@ -138,17 +161,8 @@ const CartDropdown = ({
                                     {item.title}
                                   </LocalizedClientLink>
                                 </h3>
-                                <LineItemOptions
-                                  variant={item.variant}
-                                  data-testid="cart-item-variant"
-                                  data-value={item.variant}
-                                />
-                                <span
-                                  data-testid="cart-item-quantity"
-                                  data-value={item.quantity}
-                                >
-                                  Quantity: {item.quantity}
-                                </span>
+                                <LineItemOptions variant={item.variant} />
+                                <span>Quantity: {item.quantity}</span>
                               </div>
                               <div className="flex justify-end">
                                 <LineItemPrice item={item} style="tight" />
@@ -157,8 +171,7 @@ const CartDropdown = ({
                           </div>
                           <DeleteButton
                             id={item.id}
-                            className="mt-1"
-                            data-testid="cart-item-remove-button"
+                            className="mt-1 text-white/70 hover:text-white"
                           >
                             Remove
                           </DeleteButton>
@@ -166,17 +179,14 @@ const CartDropdown = ({
                       </div>
                     ))}
                 </div>
-                <div className="p-4 flex flex-col gap-y-4 text-small-regular">
-                  <div className="flex items-center justify-between">
-                    <span className="text-ui-fg-base font-semibold">
-                      Subtotal{" "}
-                      <span className="font-normal">(excl. taxes)</span>
+
+                {/* Cart Footer */}
+                <div className="p-4 border-t border-white/10">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-white/70">
+                      Subtotal <span>(excl. taxes)</span>
                     </span>
-                    <span
-                      className="text-large-semi"
-                      data-testid="cart-subtotal"
-                      data-value={subtotal}
-                    >
+                    <span className="text-xl font-medium">
                       {convertToLocale({
                         amount: subtotal,
                         currency_code: cartState.currency_code,
@@ -185,37 +195,35 @@ const CartDropdown = ({
                   </div>
                   <LocalizedClientLink href="/cart" passHref>
                     <Button
-                      className="w-full"
+                      className="w-full bg-white text-black hover:bg-gray-100"
                       size="large"
-                      data-testid="go-to-cart-button"
+                      onClick={close}
                     >
                       Go to cart
                     </Button>
                   </LocalizedClientLink>
                 </div>
               </>
-            ) : (
-              <div>
-                <div className="flex py-16 flex-col gap-y-4 items-center justify-center">
-                  <div className="bg-gray-900 text-small-regular flex items-center justify-center w-6 h-6 rounded-full text-white">
-                    <span>0</span>
-                  </div>
-                  <span>Your shopping bag is empty.</span>
-                  <div>
-                    <LocalizedClientLink href="/store">
-                      <>
-                        <span className="sr-only">Go to all products page</span>
-                        <Button onClick={close}>Explore products</Button>
-                      </>
-                    </LocalizedClientLink>
-                  </div>
-                </div>
-              </div>
             )}
-          </Popover.Panel>
-        </Transition>
-      </Popover>
-    </div>
+          </div>
+        </div>
+      </Transition>
+
+      {/* Cart Trigger Button */}
+      <button 
+        onClick={openAndCancel}
+        className="relative flex items-center"
+        onMouseEnter={openAndCancel}
+        onMouseLeave={close}
+      >
+        <ShoppingCart className="w-5 h-5" />
+        {totalItems > 0 && (
+          <span className="absolute -top-2 -right-2 bg-black text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+            {totalItems}
+          </span>
+        )}
+      </button>
+    </>
   )
 }
 
