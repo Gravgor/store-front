@@ -22,6 +22,7 @@ export default function CategoryTemplate({
 }) {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
+  const length = categories.length
 
   const category = categories[categories.length - 1]
   if (!category || !countryCode) notFound()
@@ -31,7 +32,7 @@ export default function CategoryTemplate({
       {/* Header Section */}
       <div className="flex justify-between items-center mb-8">
         <Heading className="text-xl md:text-2xl">
-          {category.name} ({category.products?.length || 0})
+          {category.name} ({length})
         </Heading>
         
         <CategoryActions initialSort={sort} />

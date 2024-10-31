@@ -7,10 +7,12 @@ import CartButton from "@modules/layout/components/cart-button"
 import { Search, Heart, ChevronDown } from "lucide-react"
 import MobileMenu from "@modules/layout/components/mobile-menu"
 
+import { getCollectionsList } from "@lib/data/collections"
+
 export default async function Nav() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
+  const { collections } = await getCollectionsList()
   const { product_categories } = await getCategoriesList()
-  console.log(product_categories)
 
   return (
     <>
@@ -27,17 +29,31 @@ export default async function Nav() {
                   The Tiny Grand
                 </LocalizedClientLink>
 
-                {/* Desktop Categories */}
+                {/* Desktop Collections with Category Dropdowns */}
                 <div className="hidden md:flex items-center space-x-6">
-                  {product_categories.map((category) => (
-                    <LocalizedClientLink
-                      key={category.id}
-                      href={`/categories/${category.handle}`}
-                      className="text-sm hover:text-gray-600 flex items-center"
-                    >
-                      {category.name}
-                      <ChevronDown className="w-4 h-4 ml-0.5" />
-                    </LocalizedClientLink>
+                  {collections.map((collection) => (
+                    <div key={collection.handle} className="relative group">
+                      <LocalizedClientLink
+                        href={`/collections/${collection.handle}`}
+                        className="text-sm hover:text-gray-600 flex items-center"
+                      >
+                        {collection.title}
+                        <ChevronDown className="w-4 h-4 ml-0.5" />
+                      </LocalizedClientLink>
+
+                      {/* Category Dropdown - now shows all categories */}
+                      <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-gray-200 rounded-md shadow-lg py-2 min-w-[200px]">
+                        {product_categories.map((category) => (
+                          <LocalizedClientLink
+                            key={category.id}
+                            href={`/categories/${category.handle}`}
+                            className="block px-4 py-2 text-sm hover:bg-gray-50"
+                          >
+                            {category.name}
+                          </LocalizedClientLink>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
