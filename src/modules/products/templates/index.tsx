@@ -29,7 +29,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
-    { label: product.collection?.title || "Products", href: "/store" },
+    { label: product.collection?.title || "Products", href: `/collections/${product.collection?.handle}` },
     { label: product.title, href: `/products/${product.handle}` },
   ]
 
